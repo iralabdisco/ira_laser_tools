@@ -1,0 +1,7 @@
+<launch>
+	<node pkg="laser_merger" name="laser_multi_merger" type="laser_multi_merger" output="screen">
+		<param name="destination_frame" value="/cart_frame"/>
+		<param name="cloud_destination_topic" value="/merged_cloud"/>
+		<param name="scan_destination_topic" value="/scan_multi"/>
+	</node>
+</launch>

@@ -1,0 +1,6 @@
+<launch>
+	<node pkg="laser_virtualizer" name="laser_virtualizer" type="laser_virtualizer" output="screen">
+		<param name="base_frame" value="/cart_frame"/>
+		<param name="cloud_topic" value="/cloud_pcd"/>
+	</node>
+</launch>
