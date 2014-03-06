@@ -14,7 +14,7 @@
 #include "pcl_ros/point_cloud.h"
 #include <Eigen/Dense>
 #include <dynamic_reconfigure/server.h>
-#include <laser_merger/laser_multi_mergerConfig.h>
+#include <ira_laser_tools/laser_multi_mergerConfig.h>
 
 using namespace std;
 using namespace pcl;

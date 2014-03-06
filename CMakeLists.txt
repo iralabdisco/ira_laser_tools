@@ -53,7 +53,7 @@ generate_dynamic_reconfigure_options(cfg/laser_multi_merger.cfg cfg/laser_virtua
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
+   INCLUDE_DIRS
 #  LIBRARIES laser_merger
 #  CATKIN_DEPENDS laser_geometry roscpp sensor_msgs std_msgs tf
 #  DEPENDS system_lib

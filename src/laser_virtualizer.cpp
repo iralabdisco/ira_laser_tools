@@ -12,7 +12,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <Eigen/Dense>
 #include <dynamic_reconfigure/server.h>
-#include <laser_virtualizer/laser_virtualizerConfig.h>
+#include <ira_laser_tools/laser_virtualizerConfig.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> myPointCloud;
 
