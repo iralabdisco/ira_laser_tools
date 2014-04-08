@@ -40,6 +40,8 @@ class LaserMerger
 	vector<pcl::PCLPointCloud2> clouds;
 	vector<string> input_topics;
 
+    void virtual_laser_scan_parser();
+
 	double angle_min;
 	double angle_max;
 	double angle_increment;
@@ -51,6 +53,7 @@ class LaserMerger
 	string destination_frame;
 	string cloud_destination_topic;
 	string scan_destination_topic;
+    string virtual_laser_scan_list;
 };
 
 void LaserMerger::reconfigureCallback(laser_multi_mergerConfig &config, uint32_t level)
@@ -62,12 +65,15 @@ void LaserMerger::reconfigureCallback(laser_multi_mergerConfig &config, uint32_t
 	this->scan_time = config.scan_time;
 	this->range_min = config.range_min;
 	this->range_max = config.range_max;
+}
 
+void LaserMerger::virtual_laser_scan_parser()
+{
 	// LaserScan topics to subscribe
 	ros::master::V_TopicInfo topics;
 	ros::master::getTopics(topics);
 
-	istringstream iss(config.str_param);
+    istringstream iss(virtual_laser_scan_list);
 	vector<string> tokens;
 	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 
@@ -126,6 +132,7 @@ LaserMerger::LaserMerger()
 	nh.getParam("destination_frame", destination_frame);
 	nh.getParam("cloud_destination_topic", cloud_destination_topic);
 	nh.getParam("scan_destination_topic", scan_destination_topic);
+    nh.getParam("virtual_laser_scan", virtual_laser_scan_list);
 
 	point_cloud_publisher_ = node_.advertise<sensor_msgs::PointCloud2> (cloud_destination_topic.c_str(), 1, false);
 	laser_scan_publisher_ = node_.advertise<sensor_msgs::LaserScan> (scan_destination_topic.c_str(), 1, false);
