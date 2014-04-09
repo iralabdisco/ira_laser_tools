@@ -12,22 +12,22 @@
 #include <pcl_ros/point_cloud.h>
 #include <Eigen/Dense>
 #include <dynamic_reconfigure/server.h>
-#include <ira_laser_tools/laser_virtualizerConfig.h>
+#include <ira_laser_tools/laserscan_virtualizerConfig.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> myPointCloud;
 
 using namespace std;
 using namespace pcl;
-using namespace laser_virtualizer;
+using namespace laserscan_virtualizer;
 
-class LaserMerger
+class LaserscanVirtualizer
 {
 	public:
-		LaserMerger();
+        LaserscanVirtualizer();
 		void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
 		void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLHeader scan_header, int pub_index);
 		void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& pcl_in);
-		void reconfigureCallback(laser_virtualizerConfig &config, uint32_t level);
+        void reconfigureCallback(laserscan_virtualizerConfig &config, uint32_t level);
 
 	private:
 		ros::NodeHandle node_;
@@ -37,6 +37,8 @@ class LaserMerger
 		ros::Subscriber point_cloud_subscriber_;
 		vector<ros::Publisher> virtual_scan_publishers;
 		vector<string> output_frames;
+
+        void virtual_laser_scan_parser();
 
 		double angle_min;
 		double angle_max;
@@ -50,9 +52,10 @@ class LaserMerger
 		string base_frame;
         string cloud_topic;
         string output_laser_topic;
+        string virtual_laser_scan;
 };
 
-void LaserMerger::reconfigureCallback(laser_virtualizerConfig &config, uint32_t level)
+void LaserscanVirtualizer::reconfigureCallback(laserscan_virtualizerConfig &config, uint32_t level)
 {
 	this->angle_min = config.angle_min;
 	this->angle_max = config.angle_max;
@@ -61,9 +64,12 @@ void LaserMerger::reconfigureCallback(laser_virtualizerConfig &config, uint32_t 
     this->scan_time = config.scan_time;
 	this->range_min = config.range_min;
 	this->range_max = config.range_max;
+}
 
+void LaserscanVirtualizer::virtual_laser_scan_parser()
+{
 	// LaserScan frames to use for virtualization
-	istringstream iss(config.str_param);
+    istringstream iss(virtual_laser_scan);
 	vector<string> tokens;
 	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 
@@ -99,9 +105,8 @@ void LaserMerger::reconfigureCallback(laser_virtualizerConfig &config, uint32_t 
 		output_frames = tmp_output_frames;
 		if(output_frames.size() > 0)
 		{
-//			cout << "Publishing:\t" << virtual_scan_publishers.size() << " virtual scans" << endl;
-			virtual_scan_publishers.resize(output_frames.size());
-            cout << "Publishing:\t" << virtual_scan_publishers.size() << " virtual scans" << endl;
+            virtual_scan_publishers.resize(output_frames.size());
+            ROS_INFO("Publishing: %ld virtual scans", virtual_scan_publishers.size() );
             cout << "Advertising topics: " << endl;
 			for(int i=0; i<output_frames.size(); ++i)
 			{
@@ -116,27 +121,29 @@ void LaserMerger::reconfigureCallback(laser_virtualizerConfig &config, uint32_t 
                     cout << "\t\t" << output_frames[i] << " on topic " << output_laser_topic.c_str() << endl;
                 }
 			}
-			cout << endl;
 		}
 		else
-			cout << "Not publishing to any topic." << endl;
+            ROS_INFO("Not publishing to any topic.");
 	}
 }
 
-LaserMerger::LaserMerger()
+LaserscanVirtualizer::LaserscanVirtualizer()
 {
     ros::NodeHandle nh("~");
 
     //Setting class parameters
-    if(!nh.getParam("/laser_virtualizer/base_frame", base_frame))                   base_frame = "/cart_frame";
-    if(!nh.getParam("/laser_virtualizer/cloud_topic", cloud_topic))                 cloud_topic = "/cloud_pcd";
-    nh.getParam("/laser_virtualizer/output_laser_topic", output_laser_topic);
+    if(!nh.getParam("/laserscan_virtualizer/base_frame", base_frame))                   base_frame = "/cart_frame";
+    if(!nh.getParam("/laserscan_virtualizer/cloud_topic", cloud_topic))                 cloud_topic = "/cloud_pcd";
+    nh.getParam("/laserscan_virtualizer/output_laser_topic", output_laser_topic);
+    nh.getParam("/laserscan_virtualizer/virtual_laser_scan", virtual_laser_scan);
 
-	point_cloud_subscriber_ = node_.subscribe<sensor_msgs::PointCloud2> (cloud_topic.c_str(), 1, boost::bind(&LaserMerger::pointCloudCallback,this, _1));
+    this->virtual_laser_scan_parser();
+
+    point_cloud_subscriber_ = node_.subscribe<sensor_msgs::PointCloud2> (cloud_topic.c_str(), 1, boost::bind(&LaserscanVirtualizer::pointCloudCallback,this, _1));
 	cloud_frame = "";
 }
 
-void LaserMerger::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& pcl_in)
+void LaserscanVirtualizer::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& pcl_in)
 {
 	if(cloud_frame.empty())
 	{
@@ -175,7 +182,7 @@ void LaserMerger::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& p
 }
 
 
-void LaserMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLHeader scan_header, int pub_index) //pcl::PCLPointCloud2 *merged_cloud)
+void LaserscanVirtualizer::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLHeader scan_header, int pub_index) //pcl::PCLPointCloud2 *merged_cloud)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
     output->header = pcl_conversions::fromPCL(scan_header);
@@ -235,14 +242,14 @@ void LaserMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLHeader
 
 int main(int argc, char** argv)
 {
-	ros::init(argc, argv, "laser_virtualizer");
+    ros::init(argc, argv, "laserscan_virtualizer");
 
-	LaserMerger _laser_merger;
+    LaserscanVirtualizer _laser_merger;
 
-	dynamic_reconfigure::Server<laser_virtualizerConfig> server;
-	dynamic_reconfigure::Server<laser_virtualizerConfig>::CallbackType f;
+    dynamic_reconfigure::Server<laserscan_virtualizerConfig> server;
+    dynamic_reconfigure::Server<laserscan_virtualizerConfig>::CallbackType f;
 
-	f = boost::bind(&LaserMerger::reconfigureCallback,&_laser_merger, _1, _2);
+    f = boost::bind(&LaserscanVirtualizer::reconfigureCallback,&_laser_merger, _1, _2);
 	server.setCallback(f);
 
 	ros::spin();

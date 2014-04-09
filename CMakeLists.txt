@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS laser_geometry roscpp sensor_msgs std_ms
 
 find_package(PCL REQUIRED)
 
-generate_dynamic_reconfigure_options(cfg/laser_multi_merger.cfg cfg/laser_virtualizer.cfg)
+generate_dynamic_reconfigure_options(cfg/laserscan_multi_merger.cfg cfg/laserscan_virtualizer.cfg)
 
 
 ## System dependencies are found with CMake's conventions
@@ -82,19 +82,19 @@ include_directories(include
 #add_executable(laser_merger_node src/laser_merger_node.cpp)
 #target_link_libraries(laser_merger_node ${catkin_LIBRARIES})
 
-add_executable(laser_multi_merger src/laser_multi_merger.cpp)
-target_link_libraries(laser_multi_merger ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_executable(laserscan_multi_merger src/laserscan_multi_merger.cpp)
+target_link_libraries(laserscan_multi_merger ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(laser_multi_merger ${PROJECT_NAME}_gencfg)
+add_dependencies(laserscan_multi_merger ${PROJECT_NAME}_gencfg)
 
-add_executable(laser_virtualizer src/laser_virtualizer.cpp)
-target_link_libraries(laser_virtualizer ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_executable(laserscan_virtualizer src/laserscan_virtualizer.cpp)
+target_link_libraries(laserscan_virtualizer ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(laser_virtualizer ${PROJECT_NAME}_gencfg)
+add_dependencies(laserscan_virtualizer ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
 

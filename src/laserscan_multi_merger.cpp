@@ -14,49 +14,50 @@
 #include "pcl_ros/point_cloud.h"
 #include <Eigen/Dense>
 #include <dynamic_reconfigure/server.h>
-#include <ira_laser_tools/laser_multi_mergerConfig.h>
+#include <ira_laser_tools/laserscan_multi_mergerConfig.h>
 
 using namespace std;
 using namespace pcl;
-using namespace laser_multi_merger;
+using namespace laserscan_multi_merger;
 
-class LaserMerger
+class LaserscanMerger
 {
-     public:
-        LaserMerger();
-	void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
-	void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud);
-	void reconfigureCallback(laser_multi_mergerConfig &config, uint32_t level);
-     private:
-        ros::NodeHandle node_;
-        laser_geometry::LaserProjection projector_;
-        tf::TransformListener tfListener_;
+public:
+    LaserscanMerger();
+    void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
+    void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud);
+    void reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level);
 
-        ros::Publisher point_cloud_publisher_;
-        ros::Publisher laser_scan_publisher_;
-	vector<ros::Subscriber> scan_subscribers;
-	vector<bool> clouds_modified;
+private:
+    ros::NodeHandle node_;
+    laser_geometry::LaserProjection projector_;
+    tf::TransformListener tfListener_;
 
-	vector<pcl::PCLPointCloud2> clouds;
-	vector<string> input_topics;
+    ros::Publisher point_cloud_publisher_;
+    ros::Publisher laser_scan_publisher_;
+    vector<ros::Subscriber> scan_subscribers;
+    vector<bool> clouds_modified;
 
-    void virtual_laser_scan_parser();
+    vector<pcl::PCLPointCloud2> clouds;
+    vector<string> input_topics;
 
-	double angle_min;
-	double angle_max;
-	double angle_increment;
-	double time_increment;
-	double scan_time;
-	double range_min;
-	double range_max;
+    void laserscan_topic_parser();
 
-	string destination_frame;
-	string cloud_destination_topic;
-	string scan_destination_topic;
-    string virtual_laser_scan_list;
+    double angle_min;
+    double angle_max;
+    double angle_increment;
+    double time_increment;
+    double scan_time;
+    double range_min;
+    double range_max;
+
+    string destination_frame;
+    string cloud_destination_topic;
+    string scan_destination_topic;
+    string laserscan_topics;
 };
 
-void LaserMerger::reconfigureCallback(laser_multi_mergerConfig &config, uint32_t level)
+void LaserscanMerger::reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level)
 {
 	this->angle_min = config.angle_min;
 	this->angle_max = config.angle_max;
@@ -67,13 +68,13 @@ void LaserMerger::reconfigureCallback(laser_multi_mergerConfig &config, uint32_t
 	this->range_max = config.range_max;
 }
 
-void LaserMerger::virtual_laser_scan_parser()
+void LaserscanMerger::laserscan_topic_parser()
 {
 	// LaserScan topics to subscribe
 	ros::master::V_TopicInfo topics;
 	ros::master::getTopics(topics);
 
-    istringstream iss(virtual_laser_scan_list);
+    istringstream iss(laserscan_topics);
 	vector<string> tokens;
 	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 
@@ -106,33 +107,32 @@ void LaserMerger::virtual_laser_scan_parser()
 		input_topics = tmp_input_topics;
 		if(input_topics.size() > 0)
 		{
-			cout << "Subscribers: " << scan_subscribers.size() << endl;
-			scan_subscribers.resize(input_topics.size());
+            scan_subscribers.resize(input_topics.size());
 			clouds_modified.resize(input_topics.size());
 			clouds.resize(input_topics.size());
-			cout << "Subscribers: " << scan_subscribers.size() << endl;
-			cout << "Subscribing to topics: ";
+            ROS_INFO("Subscribing to topics\t%ld", scan_subscribers.size());
 			for(int i=0; i<input_topics.size(); ++i)
 			{
-				scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserMerger::scanCallback,this, _1, input_topics[i]));
+                scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserscanMerger::scanCallback,this, _1, input_topics[i]));
 				clouds_modified[i] = false;
 				cout << input_topics[i] << " ";
-
 			}
-			cout << endl;
 		}
 		else
-			cout << "Not subscribed to any topic." << endl;
+            ROS_INFO("Not subscribed to any topic.");
 	}
 }
 
-LaserMerger::LaserMerger()
+LaserscanMerger::LaserscanMerger()
 {
 	ros::NodeHandle nh("~");
+
 	nh.getParam("destination_frame", destination_frame);
 	nh.getParam("cloud_destination_topic", cloud_destination_topic);
 	nh.getParam("scan_destination_topic", scan_destination_topic);
-    nh.getParam("virtual_laser_scan", virtual_laser_scan_list);
+    nh.getParam("laserscan_topics", laserscan_topics);
+
+    this->laserscan_topic_parser();
 
 	point_cloud_publisher_ = node_.advertise<sensor_msgs::PointCloud2> (cloud_destination_topic.c_str(), 1, false);
 	laser_scan_publisher_ = node_.advertise<sensor_msgs::LaserScan> (scan_destination_topic.c_str(), 1, false);
@@ -140,11 +140,12 @@ LaserMerger::LaserMerger()
 	tfListener_.setExtrapolationLimit(ros::Duration(0.1));
 }
 
-void LaserMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic)
+void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic)
 {
 	sensor_msgs::PointCloud tmpCloud1,tmpCloud2;
 	sensor_msgs::PointCloud2 tmpCloud3;
 
+    // Verify that TF knows how to transform from the received scan to the destination scan frame
 	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
 
 	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_);
@@ -163,11 +164,13 @@ void LaserMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std
 		}
 	}	
 
+    // Count how many scans we have
 	int totalClouds = 0;
 	for(int i=0; i<clouds_modified.size(); ++i)
 		if(clouds_modified[i])
 			++totalClouds;
 
+    // Go ahead only if all subscribed scans have arrived
 	if(totalClouds == clouds_modified.size())
 	{
 		pcl::PCLPointCloud2 merged_cloud = clouds[0];
@@ -188,7 +191,7 @@ void LaserMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std
 	}
 }
 
-void LaserMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud)
+void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
 	output->header = pcl_conversions::fromPCL(merged_cloud->header);
@@ -243,12 +246,12 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "laser_multi_merger");
 
-	LaserMerger _laser_merger;
+    LaserscanMerger _laser_merger;
 
-	dynamic_reconfigure::Server<laser_multi_mergerConfig> server;
-	dynamic_reconfigure::Server<laser_multi_mergerConfig>::CallbackType f;
+    dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
+    dynamic_reconfigure::Server<laserscan_multi_mergerConfig>::CallbackType f;
 
-	f = boost::bind(&LaserMerger::reconfigureCallback,&_laser_merger, _1, _2);
+    f = boost::bind(&LaserscanMerger::reconfigureCallback,&_laser_merger, _1, _2);
 	server.setCallback(f);
 
 	ros::spin();
