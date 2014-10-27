@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ira_laser_tools)
 
+find_package(cmake_modules REQUIRED)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS laser_geometry roscpp sensor_msgs std_msgs tf eigen dynamic_reconfigure pcl_ros)
+find_package(catkin REQUIRED COMPONENTS laser_geometry roscpp sensor_msgs std_msgs tf dynamic_reconfigure pcl_ros)
 
 find_package(PCL REQUIRED)
+find_package(Eigen REQUIRED)
 
 generate_dynamic_reconfigure_options(cfg/laserscan_multi_merger.cfg cfg/laserscan_virtualizer.cfg)
 
