@@ -54,7 +54,7 @@ private:
     string destination_frame;
     string cloud_destination_topic;
     string scan_destination_topic;
-    string laserscan_topics;
+    vector<string> laserscan_topics;
 };
 
 void LaserscanMerger::reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level)
@@ -74,17 +74,13 @@ void LaserscanMerger::laserscan_topic_parser()
 	ros::master::V_TopicInfo topics;
 	ros::master::getTopics(topics);
 
-    istringstream iss(laserscan_topics);
-	vector<string> tokens;
-	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-
 	vector<string> tmp_input_topics;
 
-	for(int i=0;i<tokens.size();++i)
+	for(int i=0;i<laserscan_topics.size();++i)
 	{
 	        for(int j=0;j<topics.size();++j)
 		{
-			if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+			if( (laserscan_topics[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
 			{
 				tmp_input_topics.push_back(topics[j].name);
 			}
@@ -127,10 +123,14 @@ LaserscanMerger::LaserscanMerger()
 {
 	ros::NodeHandle nh("~");
 
+	string laserscan_topics_str;
 	nh.getParam("destination_frame", destination_frame);
 	nh.getParam("cloud_destination_topic", cloud_destination_topic);
 	nh.getParam("scan_destination_topic", scan_destination_topic);
-    nh.getParam("laserscan_topics", laserscan_topics);
+    nh.getParam("laserscan_topics", laserscan_topics_str);
+
+    istringstream iss(laserscan_topics_str);
+	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(laserscan_topics));
 
     this->laserscan_topic_parser();
 
@@ -188,6 +188,12 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 		getPointCloudAsEigen(merged_cloud,points);
 
 		pointcloud_to_laserscan(points, &merged_cloud);
+	}
+
+	// If not all desired topics were found yet, retry subscribing
+	if(input_topics.size() != laserscan_topics.size())
+	{
+		this->laserscan_topic_parser();
 	}
 }
 
