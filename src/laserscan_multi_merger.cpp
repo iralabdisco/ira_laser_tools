@@ -25,7 +25,7 @@ class LaserscanMerger
 public:
     LaserscanMerger();
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
-    void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud);
+    void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud, const sensor_msgs::LaserScan::ConstPtr& scan);
     void reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level);
 
 private:
@@ -178,16 +178,16 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 		Eigen::MatrixXf points;
 		getPointCloudAsEigen(merged_cloud,points);
 
-		pointcloud_to_laserscan(points, &merged_cloud);
+        pointcloud_to_laserscan(points, &merged_cloud, scan);
 	}
 }
 
-void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud)
+void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud, const sensor_msgs::LaserScan::ConstPtr& scan)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
 	output->header = pcl_conversions::fromPCL(merged_cloud->header);
 	output->header.frame_id = destination_frame.c_str();
-	output->header.stamp = ros::Time::now();  //fixes #265
+	output->header.stamp = scan->header.stamp;
 	output->angle_min = this->angle_min;
 	output->angle_max = this->angle_max;
 	output->angle_increment = this->angle_increment;
