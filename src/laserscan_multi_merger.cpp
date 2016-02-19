@@ -139,7 +139,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
     // Verify that TF knows how to transform from the received scan to the destination scan frame
 	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
 
-	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_);
+	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Distance);
 	try
 	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
