@@ -39,7 +39,6 @@ private:
     vector<bool> clouds_modified;
 
     vector<pcl::PCLPointCloud2> clouds;
-    vector<string> input_topics;
 
     void laserscan_topic_parser();
 
@@ -80,6 +79,7 @@ void LaserscanMerger::laserscan_topic_parser()
                         _1, laserscan_topics[i])));
         clouds_modified.push_back(false);
     }
+    clouds = vector<pcl::PCLPointCloud2>(laserscan_topics.size());
 }
 
 LaserscanMerger::LaserscanMerger()
@@ -113,9 +113,9 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
 	}catch (tf::TransformException ex){ROS_ERROR("%s",ex.what());return;}
 
-	for(int i=0; i<input_topics.size(); ++i)
+	for(int i=0; i<laserscan_topics.size(); ++i)
 	{
-		if(topic.compare(input_topics[i]) == 0)
+		if(topic.compare(laserscan_topics[i]) == 0)
 		{
 			sensor_msgs::convertPointCloudToPointCloud2(tmpCloud2,tmpCloud3);
 			pcl_conversions::toPCL(tmpCloud3, clouds[i]);
@@ -126,8 +126,12 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
     // Count how many scans we have
 	int totalClouds = 0;
 	for(int i=0; i<clouds_modified.size(); ++i)
+    {
 		if(clouds_modified[i])
+        {
 			++totalClouds;
+        }
+    }
 
     // Go ahead only if all subscribed scans have arrived
 	if(totalClouds == clouds_modified.size())
