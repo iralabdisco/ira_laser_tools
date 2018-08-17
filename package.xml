@@ -24,4 +24,8 @@
   <run_depend>laser_geometry</run_depend>
   <run_depend>roscpp</run_depend>
 
+  <!-- Needed to work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=894656 on Debian Stretch -->
+  <build_depend>libvtk-qt</build_depend>
+  <run_depend>libvtk-qt</run_depend>
+  
 </package>
