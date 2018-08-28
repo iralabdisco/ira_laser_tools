@@ -2,8 +2,8 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2018-08-28)
+------------------
 * add libvtk-qt dependency to fix debian stretch builds
   and link to paper in README.md
 * Contributors: Pietro Colombo
