@@ -73,7 +73,7 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
 )
 
-#add_definitions(${EIGEN_DEFINITIONS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a cpp library
 # add_library(laser_merger
