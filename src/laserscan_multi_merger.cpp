@@ -71,25 +71,35 @@ void LaserscanMerger::reconfigureCallback(laserscan_multi_mergerConfig &config, 
 void LaserscanMerger::laserscan_topic_parser()
 {
 	// LaserScan topics to subscribe
-	ros::master::V_TopicInfo topics;
-	ros::master::getTopics(topics);
+  ros::master::V_TopicInfo topics;
+  ros::Duration check_duration(20.0);
+  ros::Time start_check_time = ros::Time::now();
+  vector<string> tmp_input_topics;
+  while(ros::Time::now() - start_check_time < check_duration)
+  {
+    ros::master::getTopics(topics);
 
     istringstream iss(laserscan_topics);
-	vector<string> tokens;
-	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+    vector<string> tokens;
+    copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 
-	vector<string> tmp_input_topics;
+    for(int i=0;i<tokens.size();++i)
+    {
+      for(int j=0;j<topics.size();++j)
+      {
+        if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+        {
+          tmp_input_topics.push_back(topics[j].name);
+        }
+      }
+    }
 
-	for(int i=0;i<tokens.size();++i)
-	{
-	        for(int j=0;j<topics.size();++j)
-		{
-			if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
-			{
-				tmp_input_topics.push_back(topics[j].name);
-			}
-		}
-	}
+    if (!tmp_input_topics.empty())
+      break;
+
+    ros::Duration(1).sleep();
+    ROS_INFO("Try to get laser topics");
+  }
 
 	sort(tmp_input_topics.begin(),tmp_input_topics.end());
 	std::vector<string>::iterator last = std::unique(tmp_input_topics.begin(), tmp_input_topics.end());
@@ -116,11 +126,11 @@ void LaserscanMerger::laserscan_topic_parser()
                 scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserscanMerger::scanCallback,this, _1, input_topics[i]));
 				clouds_modified[i] = false;
 				cout << input_topics[i] << " ";
-			}
+      }
+      return;
 		}
-		else
-            ROS_INFO("Not subscribed to any topic.");
 	}
+  ROS_ERROR("Not subscribed to any topic.");
 }
 
 LaserscanMerger::LaserscanMerger()
