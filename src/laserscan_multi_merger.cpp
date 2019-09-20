@@ -70,57 +70,24 @@ void LaserscanMerger::reconfigureCallback(laserscan_multi_mergerConfig &config, 
 
 void LaserscanMerger::laserscan_topic_parser()
 {
-	// LaserScan topics to subscribe
-	ros::master::V_TopicInfo topics;
-	ros::master::getTopics(topics);
-
     istringstream iss(laserscan_topics);
-	vector<string> tokens;
-	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+    copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(input_topics));
 
-	vector<string> tmp_input_topics;
-
-	for(int i=0;i<tokens.size();++i)
-	{
-	        for(int j=0;j<topics.size();++j)
-		{
-			if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
-			{
-				tmp_input_topics.push_back(topics[j].name);
-			}
-		}
-	}
-
-	sort(tmp_input_topics.begin(),tmp_input_topics.end());
-	std::vector<string>::iterator last = std::unique(tmp_input_topics.begin(), tmp_input_topics.end());
-	tmp_input_topics.erase(last, tmp_input_topics.end());
-
-
-	// Do not re-subscribe if the topics are the same
-	if( (tmp_input_topics.size() != input_topics.size()) || !equal(tmp_input_topics.begin(),tmp_input_topics.end(),input_topics.begin()))
-	{
-
-		// Unsubscribe from previous topics
-		for(int i=0; i<scan_subscribers.size(); ++i)
-			scan_subscribers[i].shutdown();
-
-		input_topics = tmp_input_topics;
-		if(input_topics.size() > 0)
-		{
-            scan_subscribers.resize(input_topics.size());
-			clouds_modified.resize(input_topics.size());
-			clouds.resize(input_topics.size());
-            ROS_INFO("Subscribing to topics\t%ld", scan_subscribers.size());
-			for(int i=0; i<input_topics.size(); ++i)
-			{
-                scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserscanMerger::scanCallback,this, _1, input_topics[i]));
-				clouds_modified[i] = false;
-				cout << input_topics[i] << " ";
-			}
-		}
-		else
-            ROS_INFO("Not subscribed to any topic.");
-	}
+    if(input_topics.size() > 0)
+    {
+        scan_subscribers.resize(input_topics.size());
+        clouds_modified.resize(input_topics.size());
+        clouds.resize(input_topics.size());
+        ROS_INFO("Subscribing to topics\t%ld", scan_subscribers.size());
+        for(int i=0; i<input_topics.size(); ++i)
+        {
+            scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserscanMerger::scanCallback,this, _1, input_topics[i]));
+            clouds_modified[i] = false;
+            cout << input_topics[i] << " ";
+        }
+    }
+    else
+        ROS_INFO("Not subscribed to any topic.");
 }
 
 LaserscanMerger::LaserscanMerger()
