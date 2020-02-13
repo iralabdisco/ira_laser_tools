@@ -2,6 +2,20 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix `#14 <https://github.com/iralabdisco/ira_laser_tools/issues/14>`_
+  now we use math library for pi
+* bugfix
+* Merge branch 'kinetic'
+* fix issue fix`#14 <https://github.com/iralabdisco/ira_laser_tools/issues/14>`_
+* Create LICENSE
+* Create LICENSE
+* Merge pull request `#11 <https://github.com/iralabdisco/ira_laser_tools/issues/11>`_ from mikaelarguedas/patch-1
+  add libvtk-qt dependency to fix debian stretch builds
+* add libvtk-qt dependency to fix debian stretch builds
+* Contributors: Mikael Arguedas, Pietro Colombo, pietrocolombo
+
 1.0.2 (2018-08-28)
 ------------------
 * add libvtk-qt dependency to fix debian stretch builds
