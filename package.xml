@@ -1,23 +1,25 @@
 <?xml version="1.0"?>
 <package>
   <name>ira_laser_tools</name>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <description>The ira_laser_tools package. These nodes are meant to provide some utils for lasers, like listen to different laser scan sources and merge them in a single scan or generate virtual laser scans from a pointcloud.</description>
 
-  <maintainer email="axelfurlan@gmail.com">furlan</maintainer>
+  <url>http://www.ros.org/wiki/ira_laser_tools</url>
+  <maintainer email="augusto.ballardini@disco.unimib.it">Augusto</maintainer>
+  <maintainer email="p.colombo45@campus.unimib.it">Pietro</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>pcl</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>laser_geometry</build_depend>
   <build_depend>roscpp</build_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>pcl</run_depend>
+  <run_depend>libpcl-all-dev</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>

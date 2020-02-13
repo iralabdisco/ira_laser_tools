@@ -25,4 +25,6 @@ and the base frame to be known to TF.
 The documentation is at the moment very brief, for any question please contact us at
 furlan@disco.unimib.it or ballardini@disco.unimib.it
 
+Paper link: https://arxiv.org/abs/1411.1086
+
 Both nodes compile under catkin in hydro/indigo and use PCL1.7
