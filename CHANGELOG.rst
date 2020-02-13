@@ -2,8 +2,8 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2020-02-13)
+------------------
 * fix `#14 <https://github.com/iralabdisco/ira_laser_tools/issues/14>`_
   now we use math library for pi
 * bugfix
