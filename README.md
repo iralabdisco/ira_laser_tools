@@ -23,7 +23,7 @@ a velodyne scanner). The only requirement is the rototranslation between the vir
 and the base frame to be known to TF.
 
 The documentation is at the moment very brief, for any question please contact us at
-furlan@disco.unimib.it or ballardini@disco.unimib.it
+furlan@disco.unimib.it or augusto.ballardini@unimib.it
 
 Paper link: https://arxiv.org/abs/1411.1086
 
