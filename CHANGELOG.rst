@@ -2,8 +2,8 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2020-02-14)
+------------------
 * fix worning
   "<command-line>:0:0: warning: missing whitespace after the macro name"
 * change email maintainer
