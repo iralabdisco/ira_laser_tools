@@ -10,6 +10,10 @@ find_package(Eigen3 REQUIRED)
 
 find_package(PCL REQUIRED)
 
+# bugfix for g++-Warning
+#   "<command-line>:0:0: warning: missing whitespace after the macro name"
+remove_definitions(-DDISABLE_LIBUSB-1.0)
+
 generate_dynamic_reconfigure_options(cfg/laserscan_multi_merger.cfg cfg/laserscan_virtualizer.cfg)
 
 
