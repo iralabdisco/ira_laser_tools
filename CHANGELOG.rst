@@ -2,6 +2,13 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix worning
+  "<command-line>:0:0: warning: missing whitespace after the macro name"
+* change email maintainer
+* Contributors: Pietro Colombo
+
 1.0.3 (2020-02-13)
 ------------------
 * fix `#14 <https://github.com/iralabdisco/ira_laser_tools/issues/14>`_
