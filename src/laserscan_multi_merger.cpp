@@ -215,7 +215,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
     if (intensities_idx != -1)
     {
         //intensities present
-        output->intensities.assign(ranges_size, output->range_max + 1.0);
+        output->intensities.resize(ranges_size);
         intensities_offset = merged_cloud->fields[intensities_idx].offset;
     }
 	for(int i=0; i<points.cols(); i++)
