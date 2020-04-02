@@ -23,7 +23,7 @@ using namespace laserscan_multi_merger;
 class LaserscanMerger
 {
 public:
-    LaserscanMerger();
+    LaserscanMerger(tf::TransformListener *tf_);
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
     void pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPointCloud2 *merged_cloud);
     void reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level);
@@ -31,7 +31,7 @@ public:
 private:
     ros::NodeHandle node_;
     laser_geometry::LaserProjection projector_;
-    tf::TransformListener tfListener_;
+    tf::TransformListener *tfListener_;
 
     ros::Publisher point_cloud_publisher_;
     ros::Publisher laser_scan_publisher_;
@@ -121,7 +121,7 @@ void LaserscanMerger::laserscan_topic_parser()
 	}
 }
 
-LaserscanMerger::LaserscanMerger()
+LaserscanMerger::LaserscanMerger(tf::TransformListener *tf_)
 {
 	ros::NodeHandle nh("~");
 
@@ -136,6 +136,10 @@ LaserscanMerger::LaserscanMerger()
     nh.param("range_min", range_min, 0.45);
     nh.param("range_max", range_max, 25.0);
 
+    
+	tfListener_ = tf_;
+	// sleep for fix issue #18 is not optimal solution but works
+	ros::Duration(0.1).sleep();
     this->laserscan_topic_parser();
 
 	point_cloud_publisher_ = node_.advertise<sensor_msgs::PointCloud2> (cloud_destination_topic.c_str(), 1, false);
@@ -149,13 +153,12 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 	sensor_msgs::PointCloud2 tmpCloud3;
 
     // Verify that TF knows how to transform from the received scan to the destination scan frame
-	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
-    projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, (laser_geometry::channel_option::Distance | laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Index));
+	tfListener_->waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
+    projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, *tfListener_, (laser_geometry::channel_option::Distance | laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Index));
 	try
 	{
-		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
+		tfListener_->transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
 	}catch (tf::TransformException ex){ROS_ERROR("%s",ex.what());return;}
-
 	for(int i=0; i<input_topics.size(); ++i)
 	{
 		if(topic.compare(input_topics[i]) == 0)
@@ -270,7 +273,8 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "laser_multi_merger");
 
-    LaserscanMerger _laser_merger;
+	tf::TransformListener *tf_ = new tf::TransformListener;
+    LaserscanMerger _laser_merger(tf_);
 
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig>::CallbackType f;
