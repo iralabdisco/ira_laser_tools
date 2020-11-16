@@ -14,7 +14,7 @@ find_package(PCL REQUIRED)
 #   "<command-line>:0:0: warning: missing whitespace after the macro name"
 remove_definitions(-DDISABLE_LIBUSB-1.0)
 
-generate_dynamic_reconfigure_options(cfg/laserscan_multi_merger.cfg cfg/laserscan_virtualizer.cfg)
+generate_dynamic_reconfigure_options(cfg/laserscan_multi_merger.cfg cfg/pointcloud_multi_merger.cfg cfg/laserscan_virtualizer.cfg)
 
 
 ## System dependencies are found with CMake's conventions
@@ -91,9 +91,13 @@ include_directories(include
 add_executable(laserscan_multi_merger src/laserscan_multi_merger.cpp)
 target_link_libraries(laserscan_multi_merger ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
+add_executable(pointcloud_multi_merger src/pointcloud_multi_merger.cpp)
+target_link_libraries(pointcloud_multi_merger ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(laserscan_multi_merger ${PROJECT_NAME}_gencfg)
+add_dependencies(pointcloud_multi_merger ${PROJECT_NAME}_gencfg)
 
 add_executable(laserscan_virtualizer src/laserscan_virtualizer.cpp)
 target_link_libraries(laserscan_virtualizer ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -120,7 +124,7 @@ add_dependencies(laserscan_virtualizer ${PROJECT_NAME}_gencfg)
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS laserscan_multi_merger laserscan_virtualizer
+install(TARGETS laserscan_multi_merger pointcloud_multi_merger laserscan_virtualizer
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

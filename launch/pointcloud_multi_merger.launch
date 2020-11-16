@@ -1,0 +1,20 @@
+<!--
+DESCRITPION
+-->
+
+
+<launch>
+  <arg name="pointcloud_topics" default="/scanner_front/cloud /scanner_back/cloud" />
+
+  <node pkg="ira_laser_tools" name="pointcloud_multi_merger" type="pointcloud_multi_merger" output="screen">
+    <param name="destination_frame" value="base_link"/>
+    <param name="cloud_destination_topic" value="/merged_pcd"/>
+    <param name="pointcloud_topics" value ="$(arg pointcloud_topics)" /> <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
+    <param name="angle_min" value="-2.0"/>
+    <param name="angle_max" value="2.0"/>
+    <param name="angle_increment" value="0.0058"/>
+    <param name="scan_time" value="0.0333333"/>
+    <param name="range_min" value="0.30"/>
+    <param name="range_max" value="50.0"/>
+  </node>
+</launch>
