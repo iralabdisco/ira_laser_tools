@@ -4,7 +4,7 @@ DESCRITPION
 
 
 <launch>
-  <arg name="pointcloud_topics" default="/scanner_front/cloud /scanner_back/cloud" />
+  <arg name="pointcloud_topics" default="/clouda/cloudb" />
 
   <node pkg="ira_laser_tools" name="pointcloud_multi_merger" type="pointcloud_multi_merger" output="screen">
     <param name="destination_frame" value="base_link"/>

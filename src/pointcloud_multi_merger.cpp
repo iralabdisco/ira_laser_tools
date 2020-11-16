@@ -2,7 +2,6 @@
 #include <string.h>
 #include <tf/transform_listener.h>
 #include <pcl_ros/transforms.h>
-#include <laser_geometry/laser_geometry.h>
 #include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -10,7 +9,6 @@
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud_conversion.h> 
-#include "sensor_msgs/LaserScan.h"
 #include "pcl_ros/point_cloud.h"
 #include <Eigen/Dense>
 #include <dynamic_reconfigure/server.h>
@@ -66,7 +64,7 @@ void PointCloudMerger::reconfigureCallback(pointcloud_multi_mergerConfig &config
 
 void PointCloudMerger::pointcloud_topic_parser()
 {
-	// LaserScan topics to subscribe
+	// PointCloud topics to subscribe
 	ros::master::V_TopicInfo topics;
 	ros::master::getTopics(topics);
 
