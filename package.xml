@@ -13,14 +13,14 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl-ros</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>laser_geometry</build_depend>
   <build_depend>roscpp</build_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>libpcl-all-dev</run_depend>
-  <run_depend>pcl_ros</run_depend>
+  <run_depend>pcl-ros</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>laser_geometry</run_depend>
