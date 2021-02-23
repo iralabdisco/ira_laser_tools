@@ -4,18 +4,18 @@ DESCRITPION
 
 
 <launch>
-        <node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" output="screen">
-        	<param name="destination_frame" value="cart_frame"/>
+  <node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" output="screen">
+    <param name="destination_frame" value="laser_link"/>
 		<param name="cloud_destination_topic" value="/merged_cloud"/>
-		<param name="scan_destination_topic" value="/scan_multi"/>
-                <param name="laserscan_topics" value ="/scandx /scansx" /> <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
+		<param name="scan_destination_topic" value="/merged_scan"/>
+    <param name="laserscan_topics" value ="/front_scan /rear_scan" /> <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
 
-                <param name="angle_min" value="-2.0"/>
-                <param name="angle_max" value="2.0"/>
-                <param name="angle_increment" value="0.0058"/>
-                <param name="scan_time" value="0.0333333"/>
-                <param name="range_min" value="0.30"/>
-                <param name="range_max" value="50.0"/>
+    <param name="angle_min" value="-3.14159"/>
+    <param name="angle_max" value="3.14159"/>
+    <param name="angle_increment" value="0.0115925928177"/>
+    <param name="scan_time" value="0.0"/>
+    <param name="range_min" value="0.06"/>
+    <param name="range_max" value="25.0"/>
 
 	</node>
 </launch>
