@@ -1,3 +1,6 @@
+This is a fork from the ira_laser_tools(https://github.com/iralabdisco/ira_laser_tools.git) to 
+allow for registering new topics and customizing the config to Omnivil.
+
 This library includes some tools for laser handling in ROS. At the moment two nodes are available:
 
  - laserscan_multi_merger
