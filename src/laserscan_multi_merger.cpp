@@ -78,21 +78,31 @@ void LaserscanMerger::laserscan_topic_parser()
 	vector<string> tokens;
 	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 	vector<string> tmp_input_topics;
-	for(int i=0;i<tokens.size();++i)
+
+	while(tokens.size() != tmp_input_topics.size())
 	{
-        for(int j=0;j<topics.size();++j)
+		ros::master::getTopics(topics);
+		for(int i=0;i<tokens.size();++i)
 		{
-			if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+			for(int j=0;j<topics.size();++j)
 			{
-				tmp_input_topics.push_back(topics[j].name);
+				if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+				{
+					tmp_input_topics.push_back(topics[j].name);
+				}
 			}
 		}
+
+		sort(tmp_input_topics.begin(),tmp_input_topics.end());
+		std::vector<string>::iterator last = std::unique(tmp_input_topics.begin(), tmp_input_topics.end());
+		tmp_input_topics.erase(last, tmp_input_topics.end());
+
+		ROS_INFO_STREAM_THROTTLE(2.0, "Laserscan merger waiting for specified input topics. " <<  tmp_input_topics.size() << "/" << tokens.size() << " input topics found");
+		
+		if(tokens.size() == tmp_input_topics.size()) //Do not sleep if all input topics are found
+			break;
+		ros::Duration(1.0).sleep();
 	}
-
-	sort(tmp_input_topics.begin(),tmp_input_topics.end());
-	std::vector<string>::iterator last = std::unique(tmp_input_topics.begin(), tmp_input_topics.end());
-	tmp_input_topics.erase(last, tmp_input_topics.end());
-
 
 	// Do not re-subscribe if the topics are the same
 	if( (tmp_input_topics.size() != input_topics.size()) || !equal(tmp_input_topics.begin(),tmp_input_topics.end(),input_topics.begin()))
