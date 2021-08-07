@@ -88,6 +88,21 @@ void LaserscanMerger::laserscan_topic_parser()
 			}
 		}
 	}
+	while(tmp_input_topics.size() != tokens.size()) {
+		ROS_INFO("CAN NOT MATCH TOPIC BETWEEN ROS MASTER AND GIVEN TOPICS. RETRYING");
+		sleep(1);
+		ros::master::getTopics(topics);
+		for(int i=0;i<tokens.size();++i)
+		{
+			for(int j=0;j<topics.size();++j)
+			{
+				if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+				{
+					tmp_input_topics.push_back(topics[j].name);
+				}
+			}
+		}
+	}
 
 	sort(tmp_input_topics.begin(),tmp_input_topics.end());
 	std::vector<string>::iterator last = std::unique(tmp_input_topics.begin(), tmp_input_topics.end());
