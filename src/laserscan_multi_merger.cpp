@@ -3,7 +3,6 @@
 #include <tf/transform_listener.h>
 #include <pcl_ros/transforms.h>
 #include <laser_geometry/laser_geometry.h>
-#include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
@@ -148,13 +147,22 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 	sensor_msgs::PointCloud tmpCloud1,tmpCloud2;
 	sensor_msgs::PointCloud2 tmpCloud3;
 
-    // Verify that TF knows how to transform from the received scan to the destination scan frame
-	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
-    projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Distance);
+	// refer to http://wiki.ros.org/tf/Tutorials/tf%20and%20Time%20%28C%2B%2B%29
+	try
+	{
+		// Verify that TF knows how to transform from the received scan to the destination scan frame
+		tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
+    	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Distance);
+	}
+	catch(tf::TransformException ex){}
+	
 	try
 	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
-	}catch (tf::TransformException ex){ROS_ERROR("%s",ex.what());return;}
+	}catch (tf::TransformException ex){
+		ROS_ERROR("%s",ex.what()); 
+		return;
+	}
 
 	for(int i=0; i<input_topics.size(); ++i)
 	{
@@ -180,7 +188,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
 		for(int i=1; i<clouds_modified.size(); ++i)
 		{
-			pcl::concatenatePointCloud(merged_cloud, clouds[i], merged_cloud);
+			pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
 			clouds_modified[i] = false;
 		}
 	
@@ -198,7 +206,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
 	output->header = pcl_conversions::fromPCL(merged_cloud->header);
 	output->header.frame_id = destination_frame.c_str();
-	output->header.stamp = ros::Time::now();  //fixes #265
+	output->header.stamp = ros::Time(0);  //fixes #265
 	output->angle_min = this->angle_min;
 	output->angle_max = this->angle_max;
 	output->angle_increment = this->angle_increment;
