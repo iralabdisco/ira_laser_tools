@@ -2,6 +2,14 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add new mantainer email
+* fix launch before laser scan is available
+* add a try catch for first non valid tf
+* Retrying compare topics between ROS master and Token
+* Contributors: JackFrost67
+
 1.0.4 (2020-02-14)
 ------------------
 * fix worning
