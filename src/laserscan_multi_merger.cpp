@@ -71,31 +71,22 @@ void LaserscanMerger::laserscan_topic_parser()
 {
 	// LaserScan topics to subscribe
 	ros::master::V_TopicInfo topics;
-	ros::master::getTopics(topics);
 
     istringstream iss(laserscan_topics);
 	vector<string> tokens;
 	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
 	vector<string> tmp_input_topics;
-	for(int i=0;i<tokens.size();++i)
-	{
-        for(int j=0;j<topics.size();++j)
-		{
-			if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
-			{
-				tmp_input_topics.push_back(topics[j].name);
-			}
-		}
-	}
+
 	while(tmp_input_topics.size() != tokens.size()) {
-		ROS_INFO("CAN NOT MATCH TOPIC BETWEEN ROS MASTER AND GIVEN TOPICS. RETRYING");
-		sleep(1);
+		ROS_INFO("Waiting for topics ...");
 		ros::master::getTopics(topics);
-		for(int i=0;i<tokens.size();++i)
+		sleep(1);
+
+		for(int i = 0; i < tokens.size(); i++)
 		{
-			for(int j=0;j<topics.size();++j)
+			for(int j = 0; j < topics.size(); j++)
 			{
-				if( (tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0) )
+				if((tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0))
 				{
 					tmp_input_topics.push_back(topics[j].name);
 				}
@@ -109,14 +100,15 @@ void LaserscanMerger::laserscan_topic_parser()
 
 
 	// Do not re-subscribe if the topics are the same
-	if( (tmp_input_topics.size() != input_topics.size()) || !equal(tmp_input_topics.begin(),tmp_input_topics.end(),input_topics.begin()))
+	if( (tmp_input_topics.size() != input_topics.size()) || !equal(tmp_input_topics.begin(), tmp_input_topics.end(), input_topics.begin()))
 	{
 
 		// Unsubscribe from previous topics
-		for(int i=0; i<scan_subscribers.size(); ++i)
+		for(int i = 0; i <scan_subscribers.size(); i++)
 			scan_subscribers[i].shutdown();
 
 		input_topics = tmp_input_topics;
+
 		if(input_topics.size() > 0)
 		{
             scan_subscribers.resize(input_topics.size());
@@ -168,18 +160,11 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 		// Verify that TF knows how to transform from the received scan to the destination scan frame
 		tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
     	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Distance);
-	}
-	catch(tf::TransformException ex){}
-	
-	try
-	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
-	}catch (tf::TransformException ex){
-		ROS_ERROR("%s",ex.what()); 
-		return;
 	}
+	catch(tf::TransformException ex){ return; }
 
-	for(int i=0; i<input_topics.size(); ++i)
+	for(int i = 0; i < input_topics.size(); i++)
 	{
 		if(topic.compare(input_topics[i]) == 0)
 		{
@@ -191,9 +176,9 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
     // Count how many scans we have
 	int totalClouds = 0;
-	for(int i=0; i<clouds_modified.size(); ++i)
+	for(int i = 0; i<clouds_modified.size(); i++)
 		if(clouds_modified[i])
-			++totalClouds;
+			totalClouds++;
 
     // Go ahead only if all subscribed scans have arrived
 	if(totalClouds == clouds_modified.size())
@@ -201,7 +186,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 		pcl::PCLPointCloud2 merged_cloud = clouds[0];
 		clouds_modified[0] = false;
 
-		for(int i=1; i<clouds_modified.size(); ++i)
+		for(int i = 1; i < clouds_modified.size(); i++)
 		{
 			pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
 			clouds_modified[i] = false;
@@ -233,11 +218,11 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	output->ranges.assign(ranges_size, output->range_max + 1.0);
 
-	for(int i=0; i<points.cols(); i++)
+	for(int i = 0; i<points.cols(); i++)
 	{
-		const float &x = points(0,i);
-		const float &y = points(1,i);
-		const float &z = points(2,i);
+		const float &x = points(0, i);
+		const float &y = points(1, i);
+		const float &z = points(2, i);
 
 		if ( std::isnan(x) || std::isnan(y) || std::isnan(z) )
 		{
