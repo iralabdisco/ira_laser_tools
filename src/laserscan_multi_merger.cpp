@@ -115,7 +115,7 @@ void LaserscanMerger::laserscan_topic_parser()
 			clouds_modified.resize(input_topics.size());
 			clouds.resize(input_topics.size());
             ROS_INFO("Subscribing to topics\t%ld", scan_subscribers.size());
-			for(int i=0; i<input_topics.size(); ++i)
+			for(int i=0; i < input_topics.size(); ++i)
 			{
                 scan_subscribers[i] = node_.subscribe<sensor_msgs::LaserScan> (input_topics[i].c_str(), 1, boost::bind(&LaserscanMerger::scanCallback,this, _1, input_topics[i]));
 				clouds_modified[i] = false;
@@ -188,7 +188,11 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
 		for(int i = 1; i < clouds_modified.size(); i++)
 		{
-			pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
+			#if PCL_VERSION_COMPARE(>=, 1, 10, 0)
+				pcl::concatenate(merged_cloud, clouds[i], merged_cloud);
+			#else
+				pcl::concatenatePointCloud(merged_cloud, clouds[i], merged_cloud);
+			#endif
 			clouds_modified[i] = false;
 		}
 	
@@ -218,7 +222,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	output->ranges.assign(ranges_size, output->range_max + 1.0);
 
-	for(int i = 0; i<points.cols(); i++)
+	for(int i = 0; i < points.cols(); i++)
 	{
 		const float &x = points(0, i);
 		const float &y = points(1, i);
@@ -230,7 +234,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 			continue;
 		}
 
-		double range_sq = y*y+x*x;
+		double range_sq = pow(y, 2) + pow(x, 2);
 		double range_min_sq_ = output->range_min * output->range_min;
 		if (range_sq < range_min_sq_) {
 			ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
@@ -262,7 +266,7 @@ int main(int argc, char** argv)
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig>::CallbackType f;
 
-    f = boost::bind(&LaserscanMerger::reconfigureCallback,&_laser_merger, _1, _2);
+    f = boost::bind(&LaserscanMerger::reconfigureCallback, &_laser_merger, _1, _2);
 	server.setCallback(f);
 
 	ros::spin();

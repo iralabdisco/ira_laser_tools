@@ -75,7 +75,7 @@ void LaserscanVirtualizer::virtual_laser_scan_parser()
 
 	vector<string> tmp_output_frames;
 
-	for(int i=0;i<tokens.size();++i)
+	for(int i = 0; i < tokens.size(); i++)
 	{
 		ros::Time beg = ros::Time::now();
         if(tfListener_.waitForTransform (base_frame, tokens[i] ,ros::Time(0),ros::Duration(1.0))) // Check if TF knows the transform from this frame reference to base_frame reference
@@ -97,7 +97,7 @@ void LaserscanVirtualizer::virtual_laser_scan_parser()
 	if( (tmp_output_frames.size() != output_frames.size()) || !equal(tmp_output_frames.begin(),tmp_output_frames.end(),output_frames.begin()) )
 	{
 		// Shutdown previous publishers
-		for(int i=0; i<virtual_scan_publishers.size(); ++i)
+		for(int i = 0; i < virtual_scan_publishers.size(); i++)
 			virtual_scan_publishers[i].shutdown();
 
 		cloud_frame = "";
@@ -132,14 +132,18 @@ LaserscanVirtualizer::LaserscanVirtualizer()
     ros::NodeHandle nh("~");
 
     //Setting class parameters
-    if(!nh.getParam("/laserscan_virtualizer/base_frame", base_frame))                   base_frame = "/cart_frame";
-    if(!nh.getParam("/laserscan_virtualizer/cloud_topic", cloud_topic))                 cloud_topic = "/cloud_pcd";
-    nh.getParam("/laserscan_virtualizer/output_laser_topic", output_laser_topic);
+    if(!nh.getParam("/laserscan_virtualizer/base_frame", base_frame))
+		base_frame = "/cart_frame";
+
+    if(!nh.getParam("/laserscan_virtualizer/cloud_topic", cloud_topic))
+	    cloud_topic = "/cloud_pcd";
+    
+	nh.getParam("/laserscan_virtualizer/output_laser_topic", output_laser_topic);
     nh.getParam("/laserscan_virtualizer/virtual_laser_scan", virtual_laser_scan);
 
     this->virtual_laser_scan_parser();
 
-    point_cloud_subscriber_ = node_.subscribe<sensor_msgs::PointCloud2> (cloud_topic.c_str(), 1, boost::bind(&LaserscanVirtualizer::pointCloudCallback,this, _1));
+    point_cloud_subscriber_ = node_.subscribe<sensor_msgs::PointCloud2> (cloud_topic.c_str(), 1, boost::bind(&LaserscanVirtualizer::pointCloudCallback, this, _1));
 	cloud_frame = "";
 }
 
@@ -149,12 +153,12 @@ void LaserscanVirtualizer::pointCloudCallback(const sensor_msgs::PointCloud2::Co
 	{
 		cloud_frame = (*pcl_in).header.frame_id;
 		transform_.resize(output_frames.size());
-		for(int i=0; i<output_frames.size(); ++i)
-            if(tfListener_.waitForTransform (output_frames[i] , cloud_frame, ros::Time(0),ros::Duration(2.0)))
-                tfListener_.lookupTransform (output_frames[i] , cloud_frame, ros::Time(0), transform_[i]);
+		for(int i = 0; i < output_frames.size(); i++)
+            if(tfListener_.waitForTransform (output_frames[i], cloud_frame, ros::Time(0), ros::Duration(2.0)))
+                tfListener_.lookupTransform (output_frames[i], cloud_frame, ros::Time(0), transform_[i]);
 	}
 
-	for(int i=0; i<output_frames.size(); ++i)
+	for(int i=0; i < output_frames.size(); i++)
 	{
         myPointCloud pcl_out, tmpPcl;
 		pcl::PCLPointCloud2 tmpPcl2;
@@ -174,7 +178,7 @@ void LaserscanVirtualizer::pointCloudCallback(const sensor_msgs::PointCloud2::Co
 		// Transform the pcl into eigen matrix
 		Eigen::MatrixXf tmpEigenMatrix;
 		pcl::toPCLPointCloud2(pcl_out, tmpPcl2);
-		pcl::getPointCloudAsEigen(tmpPcl2,tmpEigenMatrix);
+		pcl::getPointCloudAsEigen(tmpPcl2, tmpEigenMatrix);
 
 		// Extract the points close to the z=0 plane, convert them into a laser-scan message and publish it
 		pointcloud_to_laserscan(tmpEigenMatrix, pcl_out.header, i);
@@ -197,27 +201,24 @@ void LaserscanVirtualizer::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	output->ranges.assign(ranges_size, output->range_max + 1.0);
 
-	for(int i=0; i<points.cols(); i++)
+	for(int i = 0; i < points.cols(); i++)
 	{
-		const float &x = points(0,i);
-		const float &y = points(1,i);
-		const float &z = points(2,i);
+		const float &x = points(0, i);
+		const float &y = points(1, i);
+		const float &z = points(2, i);
 
-		if ( std::isnan(x) || std::isnan(y) || std::isnan(z) )
+		if (std::isnan(x) || std::isnan(y) || std::isnan(z))
 		{
 			ROS_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
 			continue;
 		}
 
-        if ( std::abs(z) > 0.01 )
-			continue;
-
         pcl::PointXYZ p;
-        p.x=x;
-        p.y=y;
-        p.z=z;
+        p.x = x;
+        p.y = y;
+        p.z = z;
 
-		double range_sq = y*y+x*x;
+		double range_sq = pow(y, 2) + pow(x, 2);
 		double range_min_sq_ = output->range_min * output->range_min;
 		if (range_sq < range_min_sq_) {
 			ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
