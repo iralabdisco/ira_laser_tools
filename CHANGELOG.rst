@@ -2,7 +2,7 @@
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.0.5 (2021-08-07)
+1.0.6 (2021-08-07)
 ------------------
 * add new mantainer email
 * fix launch before laser scan is available
