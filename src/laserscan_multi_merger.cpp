@@ -73,23 +73,18 @@ void LaserscanMerger::laserscan_topic_parser()
 	ros::master::V_TopicInfo topics;
 
     istringstream iss(laserscan_topics);
-	vector<string> tokens;
-	copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+	set<string> tokens;
+	copy(istream_iterator<string>(iss), istream_iterator<string>(), inserter<set<string>>(tokens, tokens.begin()));
 	vector<string> tmp_input_topics;
 
-	while(tmp_input_topics.size() != tokens.size()) {
+	while(!tokens.empty()) {
 		ROS_INFO("Waiting for topics ...");
 		ros::master::getTopics(topics);
 		sleep(1);
 
-		for(int i = 0; i < tokens.size(); i++)
-		{
-			for(int j = 0; j < topics.size(); j++)
-			{
-				if((tokens[i].compare(topics[j].name) == 0) && (topics[j].datatype.compare("sensor_msgs/LaserScan") == 0))
-				{
-					tmp_input_topics.push_back(topics[j].name);
-				}
+		for (int i = 0; i < topics.size(); i++) {
+			if (topics[i].datatype == "sensor_msgs/LaserScan" && tokens.erase(topics[i].name) > 0) {
+				tmp_input_topics.push_back(topics[i].name);
 			}
 		}
 	}
