@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(ira_laser_tools)
+add_compile_options(-std=c++14)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
