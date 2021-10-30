@@ -1,6 +1,11 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package ira_laser_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.0.7 (2021-10-30)
+------------------
+* Use the same header in published scan as the published cloud 
+* Fix a concurrency issue
+* Contributors: JackFrost67, MikHut, Auri
 
 1.0.6 (2021-08-12)
 ------------------
