@@ -61,7 +61,7 @@ private:
 	string laserscan_topics;
 };
 
-LaserscanMerger::LaserscanMerger() : Node("laser_multi_merger")
+LaserscanMerger::LaserscanMerger() : Node("laserscan_multi_merger")
 {
 	this->declare_parameter<std::string>("destination_frame", "cart_frame");
 	this->declare_parameter<std::string>("cloud_destination_topic", "/merged_cloud");
@@ -212,7 +212,6 @@ void LaserscanMerger::scanCallback(sensor_msgs::msg::LaserScan::SharedPtr scan, 
 {
 	sensor_msgs::msg::PointCloud2 tmpCloud1, tmpCloud2;
 
-	// refer to http://wiki.ros.org/tf/Tutorials/tf%20and%20Time%20%28C%2B%2B%29
 	try
 	{
 		// Verify that TF knows how to transform from the received scan to the destination scan frame
