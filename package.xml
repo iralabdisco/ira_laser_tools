@@ -1,34 +1,38 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>ira_laser_tools</name>
-  <version>1.0.7</version>
+  <version>2.0.7</version>
   <description>The ira_laser_tools package. These nodes are meant to provide some utils for lasers, like listen to different laser scan sources and merge them in a single scan or generate virtual laser scans from a pointcloud.</description>
 
   <url>http://www.ros.org/wiki/ira_laser_tools</url>
   <maintainer email="augusto.ballardini@unimib.it">Augusto</maintainer>
   <maintainer email="p.colombo45@campus.unimib.it">Pietro</maintainer>
   <maintainer email="f.delia2@campus.unimib.it">Fabio</maintainer>
-  
+
   <license>BSD</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>pcl_ros</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>laser_geometry</build_depend>
-  <build_depend>roscpp</build_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>libpcl-all-dev</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>laser_geometry</run_depend>
-  <run_depend>roscpp</run_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>sensor_msgs</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>pcl_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>laser_geometry</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>rclcpp_lifecycle</depend>
   <!-- Needed to work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=894656 on Debian Stretch -->
-  <build_depend>libvtk-qt</build_depend>
-  <run_depend>libvtk-qt</run_depend>
-  
+  <depend>libvtk-qt</depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>eigen3</exec_depend>
+  <exec_depend>pcl</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
 </package>

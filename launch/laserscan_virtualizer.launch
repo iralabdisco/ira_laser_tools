@@ -2,8 +2,7 @@
 FROM: http://wiki.ros.org/tf#static_transform_publisher
 
 <<static_transform_publisher x y z yaw pitch roll frame_id child_frame_id period_in_ms>>
-Publish a static coordinate transform to tf using an x/y/z offset and yaw/pitch/roll. The period, in milliseconds, specifies how often to send a transform. 100ms (10hz) is a good value.
-== OR ==
+Publish a static coordinate transform to tf using an x/y/z offset and yaw/pitch/roll. The period, in milliseconds, specifies how often to send a transform. 100ms (10hz) is a good value. == OR ==
 <<static_transform_publisher x y z qx qy qz qw frame_id child_frame_id  period_in_ms>>
 Publish a static coordinate transform to tf using an x/y/z offset and quaternion. The period, in milliseconds, specifies how often to send a transform. 100ms (10hz) is a good value.
 
@@ -13,13 +12,23 @@ Publish a static coordinate transform to tf using an x/y/z offset and quaternion
 
 	<!-- DEFINE HERE THE STATIC TRANFORMS, FROM BASE_FRAME (COMMON REFERENCE FRAME) TO THE VIRTUAL LASER FRAMES-->
 	<!-- WARNING: the virtual laser frame(s) *must* match the virtual laser name(s) listed in param: output_laser_scan -->
-	<node pkg="tf" type="static_transform_publisher" name="ira_static_broadcaster1" args="0 0 0 0 0.3 0 laser_frame scansx 1000" />
-	<node pkg="tf" type="static_transform_publisher" name="ira_static_broadcaster2" args="0 0 0 0 0.0 0 laser_frame scandx 1000" />
+	<node pkg="tf2_ros" exec="static_transform_publisher" name="ira_static_broadcaster1" args="--yaw 0.3 --frame-id base_link --child-frame-id scansx" />
+	<node pkg="tf2_ros" exec="static_transform_publisher" name="ira_static_broadcaster2" args="--frame-id base_link --child-frame-id scandx" />
 
-	<node pkg="ira_laser_tools" name="laserscan_virtualizer" type="laserscan_virtualizer" output="screen">
-		<param name="cloud_topic" value="/cloud_in"/>       <!-- INPUT POINT CLOUD -->
-		<param name="base_frame" value="/laser_frame"/>     <!-- REFERENCE FRAME WHICH LASER(s) ARE RELATED-->
-		<param name="output_laser_topic" value ="/scan" />  <!-- VIRTUAL LASER OUTPUT TOPIC, LEAVE VALUE EMPTY TO PUBLISH ON THE VIRTUAL LASER NAMES (param: output_laser_scan) -->
-		<param name="virtual_laser_scan" value ="scansx scandx" /> <!-- LIST OF THE VIRTUAL LASER SCANS. YOU MUST PROVIDE THE STATIC TRANSFORMS TO TF, SEE ABOVE -->
+	<node pkg="ira_laser_tools" name="laserscan_virtualizer" exec="laserscan_virtualizer" output="screen">
+		<!-- INPUT POINT CLOUD -->
+		<param name="cloud_topic" value="/trunk4_camera_depth_camera/points"/>
+		<!-- REFERENCE FRAME WHICH LASER(s) ARE RELATED-->
+		<param name="base_frame" value="base_link"/>
+		<!-- VIRTUAL LASER OUTPUT TOPIC, LEAVE VALUE EMPTY TO PUBLISH ON THE VIRTUAL LASER NAMES (param: output_laser_scan) -->
+		<param name="output_laser_topic" value ="/scan" />
+		<!-- LIST OF THE VIRTUAL LASER SCANS. YOU MUST PROVIDE THE STATIC TRANSFORMS TO TF, SEE ABOVE -->
+		<param name="virtual_laser_scan" value ="scansx scandx" />
+		<param name="angle_min" value="-3.14"/>
+		<param name="angle_max" value="3.14"/>
+		<param name="angle_increment" value="0.00437"/>
+		<param name="scan_time" value="0.0"/>
+		<param name="range_min" value="0.1"/>
+		<param name="range_max" value="2.0"/>
 	</node>
 </launch>
