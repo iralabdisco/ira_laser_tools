@@ -25,11 +25,7 @@
   <depend>rclcpp_action</depend>
   <depend>rclcpp_lifecycle</depend>
   <!-- Needed to work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=894656 on Debian Stretch -->
-  <depend>libvtk-qt</depend>
-
   <exec_depend>rosidl_default_runtime</exec_depend>
-  <exec_depend>eigen3</exec_depend>
-  <exec_depend>pcl</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
